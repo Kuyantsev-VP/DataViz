@@ -1,6 +1,7 @@
 import { AppStoreProvider, useAppState } from "./stores/appStore";
 import { FileLoader } from "./components/FileLoader";
 import { Chart } from "./components/Chart";
+import { YAxisPanel } from "./components/YAxisPanel";
 
 function AppContent() {
   const { series } = useAppState();
@@ -13,6 +14,7 @@ function AppContent() {
       </header>
       {series.length > 0 && (
         <main className="app__main">
+          <YAxisPanel />
           <Chart />
         </main>
       )}

@@ -1,0 +1,7 @@
+.y-axis-panel {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+  overflow-x: auto;
+  flex-shrink: 0;
+}

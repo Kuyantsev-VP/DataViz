@@ -1,0 +1,81 @@
+.y-axis-scale {
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid;
+  padding: 0 6px;
+  min-width: 72px;
+  height: 100%;
+}
+
+.y-axis-scale__header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.y-axis-scale__name {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.y-axis-scale__reset {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 2px;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.y-axis-scale__reset:hover {
+  opacity: 1;
+}
+
+.y-axis-scale__ticks {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  min-height: 0;
+}
+
+.y-axis-scale__tick {
+  display: flex;
+  align-items: center;
+}
+
+.y-axis-scale__value {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #888;
+}
+
+.y-axis-scale__value--clickable {
+  cursor: pointer;
+  font-weight: 600;
+  color: inherit;
+}
+
+.y-axis-scale__value--clickable:hover {
+  text-decoration: underline;
+}
+
+.y-axis-scale__tick--bound .y-axis-scale__value {
+  font-size: 11px;
+}
+
+.y-axis-scale__input {
+  width: 64px;
+  font-size: 11px;
+  padding: 1px 4px;
+  border: 1px solid #4e79a7;
+  border-radius: 3px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
