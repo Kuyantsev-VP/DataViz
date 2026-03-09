@@ -1,0 +1,42 @@
+.chart-tooltip {
+  position: fixed;
+  z-index: 100;
+  background: rgba(30, 30, 30, 0.92);
+  color: #eee;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.chart-tooltip__time {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tooltip__table {
+  border-spacing: 0 2px;
+}
+
+.chart-tooltip__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.chart-tooltip__name {
+  padding-right: 12px;
+  color: #bbb;
+}
+
+.chart-tooltip__val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}

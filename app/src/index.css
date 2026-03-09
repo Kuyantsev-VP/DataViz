@@ -65,4 +65,14 @@ body {
 .chart-container {
   flex: 1;
   min-height: 0;
+  position: relative;
+}
+
+.chart-crosshair {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  background: rgba(255, 100, 100, 0.6);
+  pointer-events: none;
+  z-index: 50;
 }
