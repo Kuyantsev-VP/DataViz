@@ -1,0 +1,61 @@
+.x-axis-bar {
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.x-axis-bar__track {
+  position: relative;
+  flex: 1;
+  height: 20px;
+}
+
+.x-axis-bar__tick {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.x-axis-bar__value {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #888;
+}
+
+.x-axis-bar__value--clickable {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+  color: inherit;
+}
+
+.x-axis-bar__value--clickable:hover {
+  text-decoration: underline;
+}
+
+.x-axis-bar__input {
+  width: 72px;
+  font-size: 11px;
+  padding: 1px 4px;
+  border: 1px solid #4e79a7;
+  border-radius: 3px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  transform: translateX(-50%);
+}
+
+.x-axis-bar__reset {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  opacity: 0.6;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.x-axis-bar__reset:hover {
+  opacity: 1;
+}

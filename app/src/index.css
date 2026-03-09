@@ -55,8 +55,14 @@ body {
   gap: 8px;
 }
 
-.chart-container {
+.app__chart-col {
   flex: 1;
   min-width: 0;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 0;
 }

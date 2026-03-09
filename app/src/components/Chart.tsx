@@ -3,6 +3,7 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { useAppState } from "../stores/appStore";
 import { alignData } from "../utils/alignData";
+import { INTERMEDIATE_POINTS_CNT } from "../constants";
 import type { Series, SeriesViewState } from "../types";
 
 function buildOptions(
@@ -43,8 +44,24 @@ function buildOptions(
     }),
   ];
 
+  const xSplits: number[] = [];
+  if (xRange) {
+    const step = (xRange.max - xRange.min) / (INTERMEDIATE_POINTS_CNT + 1);
+    for (let i = 0; i <= INTERMEDIATE_POINTS_CNT + 1; i++) {
+      xSplits.push(xRange.min + step * i);
+    }
+  }
+
   const axes: uPlot.Axis[] = [
-    { scale: "x", side: 2, grid: { show: true } },
+    {
+      scale: "x",
+      side: 2,
+      size: 0,
+      splits: () => xSplits,
+      values: () => xSplits.map(() => ""),
+      ticks: { show: false },
+      grid: { show: true, stroke: "rgba(150,150,150,0.25)", width: 1 },
+    },
     ...series.map(() => ({
       show: false as const,
     })),
