@@ -17,12 +17,19 @@ export interface AxisRange {
   max: number;
 }
 
+/** Per-series display settings. Keyed by Series.id in ViewState. */
+export interface SeriesViewState {
+  yRange: AxisRange;
+  visible: boolean;
+  color: string;
+}
+
+/** Display state of the app. Serialized for session save/restore. */
 export interface ViewState {
-  xRange: AxisRange;
-  yRanges: Record<string, AxisRange>;
-  visibility: Record<string, boolean>;
-  colors: Record<string, string>;
+  xRange: AxisRange | null;
+  seriesView: Record<string, SeriesViewState>;
   theme: Theme;
+  notes: string;
 }
 
 export type Theme = "light" | "dark";

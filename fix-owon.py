@@ -37,7 +37,7 @@ def process_csv(input_file, output_file):
         result.append({
             'NO.': row['NO.'],
             'Time': final_time,
-            'Voltage': row['Value']
+            'Voltage': float(row['Value']) + 100
         })
         
         prev_time_str = current_time_str

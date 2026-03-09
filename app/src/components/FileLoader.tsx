@@ -1,21 +1,15 @@
 import { useCallback, useRef, useState } from "react";
-import type { Series } from "../types";
 import { parseCsv, isParseError } from "../utils/csvParser";
+import { useAppActions, useExistingNames } from "../stores/appStore";
 import { ErrorModal } from "./ErrorModal";
 import "./FileLoader.css";
 
-interface FileLoaderProps {
-  existingNames: Set<string>;
-  onLoaded: (series: Series[]) => void;
-}
-
-export function FileLoader({
-  existingNames,
-  onLoaded,
-}: FileLoaderProps) {
+export function FileLoader() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const existingNames = useExistingNames();
+  const { addSeries } = useAppActions();
 
   const processFile = useCallback(
     (file: File) => {
@@ -26,13 +20,13 @@ export function FileLoader({
         if (isParseError(result)) {
           setError(result.message);
         } else {
-          onLoaded(result.series);
+          addSeries(result.series);
         }
       };
       reader.onerror = () => setError("Failed to read file");
       reader.readAsText(file);
     },
-    [existingNames, onLoaded],
+    [existingNames, addSeries],
   );
 
   const handleFileChange = useCallback(

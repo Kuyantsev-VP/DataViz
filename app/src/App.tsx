@@ -1,29 +1,30 @@
-import { useCallback, useMemo, useState } from "react";
-import type { Series } from "./types";
+import { AppStoreProvider, useAppState } from "./stores/appStore";
 import { FileLoader } from "./components/FileLoader";
+import { Chart } from "./components/Chart";
 
-function App() {
-  const [allSeries, setAllSeries] = useState<Series[]>([]);
-
-  const existingNames = useMemo(
-    () => new Set(allSeries.map((s) => s.name)),
-    [allSeries],
-  );
-
-  const handleLoaded = useCallback((newSeries: Series[]) => {
-    setAllSeries((prev) => [...prev, ...newSeries]);
-  }, []);
+function AppContent() {
+  const { series } = useAppState();
 
   return (
     <div className="app">
-      <h1>DataViz</h1>
-      <FileLoader existingNames={existingNames} onLoaded={handleLoaded} />
-      {allSeries.length > 0 && (
-        <div style={{ padding: "16px", fontSize: "14px" }}>
-          Loaded series: {allSeries.map((s) => s.name).join(", ")}
-        </div>
+      <header className="app__header">
+        <h1>DataViz</h1>
+        <FileLoader />
+      </header>
+      {series.length > 0 && (
+        <main className="app__main">
+          <Chart />
+        </main>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AppStoreProvider>
+      <AppContent />
+    </AppStoreProvider>
   );
 }
 
