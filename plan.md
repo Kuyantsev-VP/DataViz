@@ -19,7 +19,7 @@
 - Описать интерфейсы: `Series` (имя, данные, min/max, текущий диапазон, цвет, видимость), `DataSet` (массив серий + массив Time).
 - Вынести `INTERMEDIATE_POINTS_CNT = 8` и палитру цветов в `constants.ts`.
 
-## Шаг 3: Загрузка и валидация CSV
+## ~~Шаг 3: Загрузка и валидация CSV~~ DONE
 - Компонент `FileLoader` — кнопка/drag-and-drop для загрузки CSV.
 - Парсинг через PapaParse (`header: true`, `dynamicTyping: true`).
 - Валидация:
