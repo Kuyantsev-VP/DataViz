@@ -7,10 +7,12 @@ interface YAxisScaleProps {
   color: string;
   rangeMin: number;
   rangeMax: number;
+  offset: number;
   dataMin: number;
   dataMax: number;
   visible: boolean;
   onRangeChange: (min: number, max: number) => void;
+  onOffsetChange: (offset: number) => void;
   onReset: () => void;
 }
 
@@ -31,66 +33,104 @@ function generateTicks(min: number, max: number): number[] {
   return ticks;
 }
 
+type EditTarget = "min" | "max" | "offset" | null;
+
 export function YAxisScale({
   name,
   color,
   rangeMin,
   rangeMax,
+  offset,
   dataMin,
   dataMax,
   visible,
   onRangeChange,
+  onOffsetChange,
   onReset,
 }: YAxisScaleProps) {
-  const [editingMin, setEditingMin] = useState(false);
-  const [editingMax, setEditingMax] = useState(false);
+  const [editing, setEditing] = useState<EditTarget>(null);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if ((editingMin || editingMax) && inputRef.current) {
+    if (editing && inputRef.current) {
       inputRef.current.select();
     }
-  }, [editingMin, editingMax]);
+  }, [editing]);
 
-  const isCustomRange = rangeMin !== dataMin || rangeMax !== dataMax;
-  const ticks = generateTicks(rangeMin, rangeMax);
+  const isCustomRange =
+    rangeMin !== dataMin || rangeMax !== dataMax || offset !== 0;
 
-  const handleMinClick = useCallback(() => {
-    setInputValue(String(rangeMin));
-    setEditingMin(true);
-  }, [rangeMin]);
+  const effectiveMin = rangeMin + offset;
+  const effectiveMax = rangeMax + offset;
+  const ticks = generateTicks(effectiveMin, effectiveMax);
 
-  const handleMaxClick = useCallback(() => {
-    setInputValue(String(rangeMax));
-    setEditingMax(true);
-  }, [rangeMax]);
+  const startEdit = useCallback((target: EditTarget, value: number) => {
+    setInputValue(String(value));
+    setEditing(target);
+  }, []);
 
-  const commitMin = useCallback(() => {
+  const commit = useCallback(() => {
     const val = parseFloat(inputValue);
-    if (!isNaN(val) && val < rangeMax) {
-      onRangeChange(val, rangeMax);
+    if (isNaN(val)) {
+      setEditing(null);
+      return;
     }
-    setEditingMin(false);
-  }, [inputValue, rangeMax, onRangeChange]);
 
-  const commitMax = useCallback(() => {
-    const val = parseFloat(inputValue);
-    if (!isNaN(val) && val > rangeMin) {
-      onRangeChange(rangeMin, val);
+    if (editing === "min" && val < effectiveMax) {
+      onRangeChange(val - offset, rangeMax);
+    } else if (editing === "max" && val > effectiveMin) {
+      onRangeChange(rangeMin, val - offset);
+    } else if (editing === "offset") {
+      onOffsetChange(val);
     }
-    setEditingMax(false);
-  }, [inputValue, rangeMin, onRangeChange]);
+    setEditing(null);
+  }, [
+    editing, inputValue, effectiveMin, effectiveMax,
+    offset, rangeMin, rangeMax, onRangeChange, onOffsetChange,
+  ]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, commit: () => void, cancel: () => void) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === "Enter") commit();
-      if (e.key === "Escape") cancel();
+      if (e.key === "Escape") setEditing(null);
     },
-    [],
+    [commit],
   );
 
   if (!visible) return null;
+
+  const renderEditable = (
+    target: EditTarget,
+    value: number,
+    title: string,
+    extraClass?: string,
+  ) => {
+    if (editing === target) {
+      return (
+        <input
+          ref={inputRef}
+          className="y-axis-scale__input"
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={handleKeyDown}
+          autoFocus
+        />
+      );
+    }
+    const display = target === "offset" ? value.toFixed(2) : formatTick(value);
+    return (
+      <span
+        className={`y-axis-scale__value y-axis-scale__value--clickable ${extraClass ?? ""}`}
+        onClick={() => startEdit(target, value)}
+        title={title}
+      >
+        {display}
+      </span>
+    );
+  };
 
   return (
     <div className="y-axis-scale" style={{ borderColor: color }}>
@@ -111,28 +151,7 @@ export function YAxisScale({
 
       <div className="y-axis-scale__ticks">
         <div className="y-axis-scale__tick y-axis-scale__tick--bound">
-          {editingMax ? (
-            <input
-              ref={inputRef}
-              className="y-axis-scale__input"
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={commitMax}
-              onKeyDown={(e) =>
-                handleKeyDown(e, commitMax, () => setEditingMax(false))
-              }
-              autoFocus
-            />
-          ) : (
-            <span
-              className="y-axis-scale__value y-axis-scale__value--clickable"
-              onClick={handleMaxClick}
-              title="Click to edit max"
-            >
-              {formatTick(rangeMax)}
-            </span>
-          )}
+          {renderEditable("max", effectiveMax, "Click to edit max")}
         </div>
 
         {ticks.reverse().map((tick, i) => (
@@ -142,29 +161,13 @@ export function YAxisScale({
         ))}
 
         <div className="y-axis-scale__tick y-axis-scale__tick--bound">
-          {editingMin ? (
-            <input
-              ref={inputRef}
-              className="y-axis-scale__input"
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={commitMin}
-              onKeyDown={(e) =>
-                handleKeyDown(e, commitMin, () => setEditingMin(false))
-              }
-              autoFocus
-            />
-          ) : (
-            <span
-              className="y-axis-scale__value y-axis-scale__value--clickable"
-              onClick={handleMinClick}
-              title="Click to edit min"
-            >
-              {formatTick(rangeMin)}
-            </span>
-          )}
+          {renderEditable("min", effectiveMin, "Click to edit min")}
         </div>
+      </div>
+
+      <div className="y-axis-scale__offset">
+        <span className="y-axis-scale__offset-label">ofs</span>
+        {renderEditable("offset", offset, "Click to edit offset")}
       </div>
     </div>
   );

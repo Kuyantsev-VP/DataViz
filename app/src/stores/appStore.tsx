@@ -19,6 +19,8 @@ type Action =
   | { type: "SET_Y_RANGE"; payload: { id: string; range: AxisRange } }
   | { type: "RESET_Y_RANGE"; payload: string }
   | { type: "SET_VISIBILITY"; payload: { id: string; visible: boolean } }
+  | { type: "SET_SCALE_VISIBILITY"; payload: { id: string; scaleVisible: boolean } }
+  | { type: "SET_Y_OFFSET"; payload: { id: string; offset: number } }
   | { type: "SET_COLOR"; payload: { id: string; color: string } }
   | { type: "SET_THEME"; payload: Theme }
   | { type: "SET_NOTES"; payload: string }
@@ -75,7 +77,9 @@ function reducer(state: AppState, action: Action): AppState {
       newSeries.forEach((s, i) => {
         seriesView[s.id] = {
           yRange: { min: s.dataMin, max: s.dataMax },
+          yOffset: 0,
           visible: true,
+          scaleVisible: true,
           color: SERIES_COLORS[(colorBase + i) % SERIES_COLORS.length],
         };
       });
@@ -115,15 +119,32 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         view: updateSeriesView(view, action.payload, {
           yRange: { min: s.dataMin, max: s.dataMax },
+          yOffset: 0,
         }),
       };
     }
+
+    case "SET_Y_OFFSET":
+      return {
+        ...state,
+        view: updateSeriesView(view, action.payload.id, {
+          yOffset: action.payload.offset,
+        }),
+      };
 
     case "SET_VISIBILITY":
       return {
         ...state,
         view: updateSeriesView(view, action.payload.id, {
           visible: action.payload.visible,
+        }),
+      };
+
+    case "SET_SCALE_VISIBILITY":
+      return {
+        ...state,
+        view: updateSeriesView(view, action.payload.id, {
+          scaleVisible: action.payload.scaleVisible,
         }),
       };
 
@@ -155,7 +176,9 @@ interface AppActions {
   resetXRange: () => void;
   setYRange: (id: string, range: AxisRange) => void;
   resetYRange: (id: string) => void;
+  setYOffset: (id: string, offset: number) => void;
   setVisibility: (id: string, visible: boolean) => void;
+  setScaleVisibility: (id: string, scaleVisible: boolean) => void;
   setColor: (id: string, color: string) => void;
   setTheme: (theme: Theme) => void;
   setNotes: (text: string) => void;
@@ -176,8 +199,12 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       setYRange: (id, range) =>
         dispatch({ type: "SET_Y_RANGE", payload: { id, range } }),
       resetYRange: (id) => dispatch({ type: "RESET_Y_RANGE", payload: id }),
+      setYOffset: (id, offset) =>
+        dispatch({ type: "SET_Y_OFFSET", payload: { id, offset } }),
       setVisibility: (id, visible) =>
         dispatch({ type: "SET_VISIBILITY", payload: { id, visible } }),
+      setScaleVisibility: (id, scaleVisible) =>
+        dispatch({ type: "SET_SCALE_VISIBILITY", payload: { id, scaleVisible } }),
       setColor: (id, color) =>
         dispatch({ type: "SET_COLOR", payload: { id, color } }),
       setTheme: (t) => dispatch({ type: "SET_THEME", payload: t }),

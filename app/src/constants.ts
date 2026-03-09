@@ -1,4 +1,4 @@
-export const INTERMEDIATE_POINTS_CNT = 8;
+export const INTERMEDIATE_POINTS_CNT = 9;
 
 export const SERIES_COLORS = [
   "#4e79a7",

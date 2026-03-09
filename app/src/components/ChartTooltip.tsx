@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { TooltipEntry } from "../utils/interpolate";
 import "./ChartTooltip.css";
 
@@ -16,11 +17,22 @@ interface ChartTooltipProps {
   y: number;
 }
 
+const OFFSET = 12;
+
 export function ChartTooltip({ time, entries, x, y }: ChartTooltipProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
   if (entries.length === 0) return null;
 
+  const w = ref.current?.offsetWidth ?? 0;
+  const flip = x + OFFSET + w > window.innerWidth;
+
+  const style: React.CSSProperties = flip
+    ? { left: x - OFFSET - w, top: y }
+    : { left: x + OFFSET, top: y };
+
   return (
-    <div className="chart-tooltip" style={{ left: x, top: y }}>
+    <div ref={ref} className="chart-tooltip" style={style}>
       <div className="chart-tooltip__time">
         Time: {formatValue(time)}
       </div>

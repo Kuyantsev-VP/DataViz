@@ -4,7 +4,7 @@ import "./YAxisPanel.css";
 
 export function YAxisPanel() {
   const { series, view } = useAppState();
-  const { setYRange, resetYRange } = useAppActions();
+  const { setYRange, resetYRange, setYOffset } = useAppActions();
 
   return (
     <div className="y-axis-panel">
@@ -18,12 +18,12 @@ export function YAxisPanel() {
             color={sv.color}
             rangeMin={sv.yRange.min}
             rangeMax={sv.yRange.max}
+            offset={sv.yOffset}
             dataMin={s.dataMin}
             dataMax={s.dataMax}
-            visible={sv.visible}
-            onRangeChange={(min, max) =>
-              setYRange(s.id, { min, max })
-            }
+            visible={sv.visible && sv.scaleVisible}
+            onRangeChange={(min, max) => setYRange(s.id, { min, max })}
+            onOffsetChange={(offset) => setYOffset(s.id, offset)}
             onReset={() => resetYRange(s.id)}
           />
         );

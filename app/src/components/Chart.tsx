@@ -28,14 +28,19 @@ function buildOptions(
       time: false,
       range: xRange ? [xRange.min, xRange.max] : [0, 1],
     },
+    _yGrid: {
+      auto: false,
+      range: [0, 1],
+    },
   };
 
   for (const s of series) {
     const sv = seriesView[s.id];
     if (!sv) continue;
+    const ofs = sv.yOffset ?? 0;
     scales[s.id] = {
       auto: false,
-      range: [sv.yRange.min, sv.yRange.max],
+      range: [sv.yRange.min + ofs, sv.yRange.max + ofs],
     };
   }
 
@@ -63,6 +68,12 @@ function buildOptions(
     }
   }
 
+  const ySplits: number[] = [];
+  const yStep = 1 / (INTERMEDIATE_POINTS_CNT + 1);
+  for (let i = 0; i <= INTERMEDIATE_POINTS_CNT + 1; i++) {
+    ySplits.push(yStep * i);
+  }
+
   const axes: uPlot.Axis[] = [
     {
       scale: "x",
@@ -70,6 +81,15 @@ function buildOptions(
       size: 0,
       splits: () => xSplits,
       values: () => xSplits.map(() => ""),
+      ticks: { show: false },
+      grid: { show: true, stroke: "rgba(150,150,150,0.25)", width: 1 },
+    },
+    {
+      scale: "_yGrid",
+      side: 3,
+      size: 0,
+      splits: () => ySplits,
+      values: () => ySplits.map(() => ""),
       ticks: { show: false },
       grid: { show: true, stroke: "rgba(150,150,150,0.25)", width: 1 },
     },

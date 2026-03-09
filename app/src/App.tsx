@@ -3,6 +3,8 @@ import { FileLoader } from "./components/FileLoader";
 import { Chart } from "./components/Chart";
 import { YAxisPanel } from "./components/YAxisPanel";
 import { XAxisBar } from "./components/XAxisBar";
+import { XScrollbar } from "./components/XScrollbar";
+import { Legend } from "./components/Legend";
 
 function AppContent() {
   const { series } = useAppState();
@@ -12,6 +14,7 @@ function AppContent() {
       <header className="app__header">
         <h1>DataViz</h1>
         <FileLoader />
+        <Legend />
       </header>
       {series.length > 0 && (
         <main className="app__main">
@@ -19,6 +22,7 @@ function AppContent() {
           <div className="app__chart-col">
             <Chart />
             <XAxisBar />
+            <XScrollbar />
           </div>
         </main>
       )}

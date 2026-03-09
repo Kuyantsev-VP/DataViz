@@ -20,7 +20,9 @@ export interface AxisRange {
 /** Per-series display settings. Keyed by Series.id in ViewState. */
 export interface SeriesViewState {
   yRange: AxisRange;
+  yOffset: number;
   visible: boolean;
+  scaleVisible: boolean;
   color: string;
 }
 
