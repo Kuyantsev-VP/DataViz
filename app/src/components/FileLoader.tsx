@@ -1,33 +1,38 @@
 import { useCallback, useRef, useState } from "react";
-import { parseCsv, isParseError } from "../utils/csvParser";
-import { useAppActions, useExistingNames } from "../stores/appStore";
+import { preParseCsv, isParseError, type PreParseResult } from "../utils/csvParser";
 import { ErrorModal } from "./ErrorModal";
+import { ImportWizard } from "./ImportWizard";
+import { ALLOWED_FILE_EXTENSIONS } from "../constants";
 import "./FileLoader.css";
+
+const acceptStr = ALLOWED_FILE_EXTENSIONS.join(",");
 
 export function FileLoader() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [wizardData, setWizardData] = useState<PreParseResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const existingNames = useExistingNames();
-  const { addSeries } = useAppActions();
 
-  const processFile = useCallback(
-    (file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const result = parseCsv(text, existingNames);
-        if (isParseError(result)) {
-          setError(result.message);
-        } else {
-          addSeries(result.series);
-        }
-      };
-      reader.onerror = () => setError("Failed to read file");
-      reader.readAsText(file);
-    },
-    [existingNames, addSeries],
-  );
+  const processFile = useCallback((file: File) => {
+    const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+    if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
+      setError(`Unsupported file extension "${ext}". Allowed: ${ALLOWED_FILE_EXTENSIONS.join(", ")}`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const result = preParseCsv(text);
+      if (isParseError(result)) {
+        setError(result.message);
+      } else {
+        setWizardData(result);
+      }
+    };
+    reader.onerror = () => setError("Failed to read file");
+    reader.readAsText(file);
+  }, []);
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,16 +74,27 @@ export function FileLoader() {
         <input
           ref={inputRef}
           type="file"
-          accept=".csv"
+          accept={acceptStr}
           onChange={handleFileChange}
           hidden
         />
         <span className="file-loader__text">
-          Drop CSV file here or click to browse
+          Drop CSV/TXT file here or click to browse
         </span>
       </div>
       {error && (
         <ErrorModal message={error} onClose={() => setError(null)} />
+      )}
+      {wizardData && (
+        <ImportWizard
+          columns={wizardData.columns}
+          rows={wizardData.rows}
+          onClose={() => setWizardData(null)}
+          onError={(msg) => {
+            setWizardData(null);
+            setError(msg);
+          }}
+        />
       )}
     </>
   );

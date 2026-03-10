@@ -13,7 +13,7 @@ interface AppState {
 }
 
 type Action =
-  | { type: "ADD_SERIES"; payload: Series[] }
+  | { type: "ADD_SERIES"; payload: { series: Series[]; colors?: string[] } }
   | { type: "SET_X_RANGE"; payload: AxisRange }
   | { type: "RESET_X_RANGE" }
   | { type: "SET_Y_RANGE"; payload: { id: string; range: AxisRange } }
@@ -72,7 +72,7 @@ function reducer(state: AppState, action: Action): AppState {
 
   switch (action.type) {
     case "ADD_SERIES": {
-      const newSeries = action.payload;
+      const { series: newSeries, colors } = action.payload;
       const allSeries = [...state.series, ...newSeries];
       const colorBase = state.series.length;
 
@@ -83,7 +83,7 @@ function reducer(state: AppState, action: Action): AppState {
           yOffset: 0,
           visible: true,
           scaleVisible: true,
-          color: SERIES_COLORS[(colorBase + i) % SERIES_COLORS.length],
+          color: colors?.[i] ?? SERIES_COLORS[(colorBase + i) % SERIES_COLORS.length],
         };
       });
 
@@ -187,7 +187,7 @@ function reducer(state: AppState, action: Action): AppState {
 }
 
 interface AppActions {
-  addSeries: (series: Series[]) => void;
+  addSeries: (series: Series[], colors?: string[]) => void;
   setXRange: (range: AxisRange) => void;
   resetXRange: () => void;
   setYRange: (id: string, range: AxisRange) => void;
@@ -211,7 +211,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
 
   const actions = useMemo<AppActions>(
     () => ({
-      addSeries: (s) => dispatch({ type: "ADD_SERIES", payload: s }),
+      addSeries: (s, c) =>
+        dispatch({ type: "ADD_SERIES", payload: { series: s, colors: c } }),
       setXRange: (r) => dispatch({ type: "SET_X_RANGE", payload: r }),
       resetXRange: () => dispatch({ type: "RESET_X_RANGE" }),
       setYRange: (id, range) =>

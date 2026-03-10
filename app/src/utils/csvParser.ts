@@ -1,37 +1,61 @@
 import Papa from "papaparse";
 import type { Series } from "../types";
 
-export interface ParseResult {
-  series: Series[];
-}
-
 export interface ParseError {
   message: string;
 }
 
-/**
- * Resolve duplicate column names by appending `_<N>` suffix.
- * `existingNames` — names already present in the app from previous CSVs.
- */
-function deduplicateNames(
-  columns: string[],
-  existingNames: Set<string>,
-): string[] {
-  const result: string[] = [];
-  const allNames = new Set(existingNames);
+/** Result of pre-parsing: raw column names + parsed rows, before validation. */
+export interface PreParseResult {
+  columns: string[];
+  rows: Record<string, unknown>[];
+}
 
-  for (const col of columns) {
-    let name = col;
-    if (allNames.has(name)) {
-      let n = 2;
-      while (allNames.has(`${col}_${n}`)) n++;
-      name = `${col}_${n}`;
-    }
-    allNames.add(name);
-    result.push(name);
+export interface ParseResult {
+  series: Series[];
+  colors?: string[];
+}
+
+export function isParseError(
+  result: PreParseResult | ParseResult | ParseError,
+): result is ParseError {
+  return "message" in result;
+}
+
+/**
+ * First stage: parse CSV text with PapaParse and return column names + rows.
+ * Only checks for parse errors and empty data.
+ */
+export function preParseCsv(csvText: string): PreParseResult | ParseError {
+  const parsed = Papa.parse<Record<string, unknown>>(csvText, {
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: true,
+  });
+
+  if (parsed.errors.length > 0) {
+    const first = parsed.errors[0];
+    return { message: `CSV parse error (row ${first.row}): ${first.message}` };
   }
 
-  return result;
+  const columns = parsed.meta.fields;
+  if (!columns || columns.length === 0) {
+    return { message: "CSV file has no columns" };
+  }
+
+  if (parsed.data.length === 0) {
+    return { message: "CSV file has no data rows" };
+  }
+
+  return { columns, rows: parsed.data };
+}
+
+/** Column config from the wizard. */
+export interface WizardColumn {
+  originalName: string;
+  displayName: string;
+  enabled: boolean;
+  color: string;
 }
 
 function validateTimeColumn(timeValues: unknown[]): ParseError | null {
@@ -60,51 +84,74 @@ function validateTimeColumn(timeValues: unknown[]): ParseError | null {
   return null;
 }
 
-export function parseCsv(
-  csvText: string,
+function deduplicateNames(
+  names: string[],
+  existingNames: Set<string>,
+): string[] {
+  const result: string[] = [];
+  const allNames = new Set(existingNames);
+
+  for (const name of names) {
+    let resolved = name;
+    if (allNames.has(resolved)) {
+      let n = 2;
+      while (allNames.has(`${name}_${n}`)) n++;
+      resolved = `${name}_${n}`;
+    }
+    allNames.add(resolved);
+    result.push(resolved);
+  }
+
+  return result;
+}
+
+/**
+ * Second stage: validate and build Series from wizard config.
+ * Called when user clicks Apply in the wizard.
+ */
+export function finalizeParse(
+  rows: Record<string, unknown>[],
+  wizardColumns: WizardColumn[],
   existingNames: Set<string>,
 ): ParseResult | ParseError {
-  const parsed = Papa.parse<Record<string, unknown>>(csvText, {
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: true,
-  });
+  const enabled = wizardColumns.filter((c) => c.enabled);
 
-  if (parsed.errors.length > 0) {
-    const first = parsed.errors[0];
-    return { message: `CSV parse error (row ${first.row}): ${first.message}` };
+  const timeCol = enabled.find((c) => c.displayName === "Time");
+  if (!timeCol) {
+    return { message: 'No column named "Time" among selected columns' };
   }
 
-  const fields = parsed.meta.fields;
-  if (!fields || fields.length === 0) {
-    return { message: "CSV file has no columns" };
+  const displayNames = enabled
+    .filter((c) => c.displayName !== "Time")
+    .map((c) => c.displayName);
+
+  const seen = new Set<string>();
+  for (const name of displayNames) {
+    if (seen.has(name)) {
+      return { message: `Duplicate series name: "${name}"` };
+    }
+    seen.add(name);
   }
 
-  if (!fields.includes("Time")) {
-    return { message: 'CSV file must contain a "Time" column' };
-  }
-
-  const rows = parsed.data;
-  if (rows.length === 0) {
-    return { message: "CSV file has no data rows" };
-  }
-
-  const timeValues = rows.map((row) => row["Time"]);
+  const timeValues = rows.map((row) => row[timeCol.originalName]);
   const timeError = validateTimeColumn(timeValues);
   if (timeError) return timeError;
 
   const time = timeValues as number[];
-  const dataColumns = fields.filter((f) => f !== "Time");
 
-  if (dataColumns.length === 0) {
-    return { message: "CSV file has no data columns besides Time" };
+  const dataCols = enabled.filter((c) => c.displayName !== "Time");
+  if (dataCols.length === 0) {
+    return { message: "No data columns selected besides Time" };
   }
 
-  const resolvedNames = deduplicateNames(dataColumns, existingNames);
+  const resolvedNames = deduplicateNames(
+    dataCols.map((c) => c.displayName),
+    existingNames,
+  );
 
-  const series: Series[] = dataColumns.map((col, i) => {
+  const series: Series[] = dataCols.map((col, i) => {
     const values = rows.map((row) => {
-      const v = row[col];
+      const v = row[col.originalName];
       if (typeof v === "number" && isFinite(v)) return v;
       return null;
     });
@@ -123,11 +170,5 @@ export function parseCsv(
     };
   });
 
-  return { series };
-}
-
-export function isParseError(
-  result: ParseResult | ParseError,
-): result is ParseError {
-  return "message" in result;
+  return { series, colors: dataCols.map((c) => c.color) };
 }

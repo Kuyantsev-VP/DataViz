@@ -1,5 +1,7 @@
 export const INTERMEDIATE_POINTS_CNT = 9;
 
+export const ALLOWED_FILE_EXTENSIONS = [".csv", ".txt"];
+
 export const SERIES_COLORS = [
   "#4e79a7",
   "#f28e2b",
