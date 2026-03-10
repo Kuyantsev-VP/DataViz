@@ -47,6 +47,28 @@ body {
   margin: 0;
 }
 
+.app__header-spacer {
+  flex: 1;
+}
+
+.app__icon-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.app__icon-btn:hover {
+  opacity: 1;
+  background: rgba(150, 150, 150, 0.15);
+}
+
 .app__main {
   flex: 1;
   min-height: 0;
