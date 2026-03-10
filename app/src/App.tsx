@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { AppStoreProvider, useAppState } from "./stores/appStore";
+import { useEffect, useState, useCallback } from "react";
+import { AppStoreProvider, useAppState, useAppActions } from "./stores/appStore";
+import { loadSession, clearSession, type SavedSession } from "./utils/persistence";
 import { FileLoader } from "./components/FileLoader";
 import { Chart } from "./components/Chart";
 import { YAxisPanel } from "./components/YAxisPanel";
@@ -8,6 +9,7 @@ import { XScrollbar } from "./components/XScrollbar";
 import { Legend } from "./components/Legend";
 import { NotesModal } from "./components/NotesModal";
 import { SettingsModal } from "./components/SettingsModal";
+import { SessionRestoreDialog } from "./components/SessionRestoreDialog";
 
 function NotesIcon() {
   return (
@@ -20,13 +22,51 @@ function NotesIcon() {
   );
 }
 
+type StartupState =
+  | { status: "checking" }
+  | { status: "prompt"; session: SavedSession }
+  | { status: "ready" };
+
 function AppContent() {
   const { series, view } = useAppState();
+  const { restoreSession } = useAppActions();
   const [showNotes, setShowNotes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [startup, setStartup] = useState<StartupState>({ status: "checking" });
+
+  useEffect(() => {
+    loadSession().then((saved) => {
+      if (saved) {
+        setStartup({ status: "prompt", session: saved });
+      } else {
+        setStartup({ status: "ready" });
+      }
+    });
+  }, []);
+
+  const handleRestore = useCallback(() => {
+    if (startup.status === "prompt") {
+      restoreSession(startup.session);
+    }
+    setStartup({ status: "ready" });
+  }, [startup, restoreSession]);
+
+  const handleDiscard = useCallback(() => {
+    clearSession();
+    setStartup({ status: "ready" });
+  }, []);
+
+  if (startup.status === "checking") return null;
 
   return (
     <div className={`app theme-${view.theme}`}>
+      {startup.status === "prompt" && (
+        <SessionRestoreDialog
+          session={startup.session}
+          onRestore={handleRestore}
+          onDiscard={handleDiscard}
+        />
+      )}
       <header className="app__header">
         <h1>DataViz</h1>
         <FileLoader />

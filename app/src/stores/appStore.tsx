@@ -1,11 +1,14 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from "react";
 import type { AxisRange, Series, SeriesViewState, Theme, ViewState } from "../types";
 import { SERIES_COLORS } from "../constants";
+import { saveSession, type SavedSession } from "../utils/persistence";
 
 interface AppState {
   series: Series[];
@@ -26,6 +29,7 @@ type Action =
   | { type: "SET_NOTES"; payload: string }
   | { type: "SET_TOOLTIP_ALWAYS_ON"; payload: boolean }
   | { type: "RENAME_SERIES"; payload: { id: string; name: string } }
+  | { type: "RESTORE_SESSION"; payload: SavedSession }
   | { type: "CLEAR_ALL" };
 
 function computeGlobalXRange(series: Series[]): AxisRange | null {
@@ -178,6 +182,12 @@ function reducer(state: AppState, action: Action): AppState {
       };
     }
 
+    case "RESTORE_SESSION":
+      return {
+        series: action.payload.series,
+        view: action.payload.view,
+      };
+
     case "CLEAR_ALL":
       return { series: [], view: { ...initialView } };
 
@@ -200,6 +210,7 @@ interface AppActions {
   setNotes: (text: string) => void;
   setTooltipAlwaysOn: (on: boolean) => void;
   renameSeries: (id: string, name: string) => void;
+  restoreSession: (session: SavedSession) => void;
   clearAll: () => void;
 }
 
@@ -232,10 +243,22 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "SET_TOOLTIP_ALWAYS_ON", payload: on }),
       renameSeries: (id, name) =>
         dispatch({ type: "RENAME_SERIES", payload: { id, name } }),
+      restoreSession: (session) =>
+        dispatch({ type: "RESTORE_SESSION", payload: session }),
       clearAll: () => dispatch({ type: "CLEAR_ALL" }),
     }),
     [],
   );
+
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => {
+    if (state.series.length === 0) return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveSession(state.series, state.view);
+    }, 500);
+    return () => clearTimeout(saveTimer.current);
+  }, [state]);
 
   return (
     <StateContext.Provider value={state}>

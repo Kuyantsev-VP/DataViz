@@ -1,0 +1,69 @@
+.session-restore {
+  border: none;
+  border-radius: 10px;
+  padding: 0;
+  min-width: 340px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  background: var(--modal-bg);
+  color: var(--text);
+}
+
+.session-restore::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.session-restore__content {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.session-restore__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.session-restore__info {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.session-restore__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.session-restore__btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.session-restore__btn--primary {
+  background: var(--accent);
+  color: #fff;
+  flex: 1;
+}
+
+.session-restore__btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.session-restore__btn--secondary {
+  background: none;
+  border: 1px solid var(--input-border);
+  color: var(--text-muted);
+}
+
+.session-restore__btn--secondary:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
