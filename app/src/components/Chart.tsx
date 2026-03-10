@@ -197,20 +197,28 @@ export function Chart() {
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (e.buttons & 2) {
+      if (view.tooltipAlwaysOn) {
+        updateTooltip(e.clientX, e.clientY);
+      } else if (e.buttons & 2) {
         updateTooltip(e.clientX, e.clientY);
       }
     },
-    [updateTooltip],
+    [updateTooltip, view.tooltipAlwaysOn],
   );
+
+  const handleMouseLeave = useCallback(() => {
+    if (view.tooltipAlwaysOn) {
+      setTooltip(null);
+    }
+  }, [view.tooltipAlwaysOn]);
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 2) {
+      if (e.button === 2 && !view.tooltipAlwaysOn) {
         setTooltip(null);
       }
     },
-    [],
+    [view.tooltipAlwaysOn],
   );
 
   if (series.length === 0) return null;
@@ -224,6 +232,7 @@ export function Chart() {
       className="chart-container"
       onContextMenu={handleContextMenu}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
     >
       {tooltip && (

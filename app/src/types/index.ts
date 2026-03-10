@@ -32,6 +32,7 @@ export interface ViewState {
   seriesView: Record<string, SeriesViewState>;
   theme: Theme;
   notes: string;
+  tooltipAlwaysOn: boolean;
 }
 
 export type Theme = "light" | "dark";

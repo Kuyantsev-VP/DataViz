@@ -1,0 +1,123 @@
+.settings-modal {
+  border: none;
+  border-radius: 10px;
+  padding: 0;
+  min-width: 340px;
+  max-width: 90vw;
+  max-height: 80vh;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+}
+
+.settings-modal::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.settings-modal__content {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: calc(80vh - 40px);
+}
+
+.settings-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-modal__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.settings-modal__close {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.settings-modal__close:hover {
+  opacity: 1;
+}
+
+.settings-modal__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.settings-modal__theme-btn {
+  padding: 4px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.settings-modal__theme-btn:hover {
+  border-color: #999;
+}
+
+.settings-modal__divider {
+  border-top: 1px solid rgba(150, 150, 150, 0.25);
+  margin: 4px 0;
+}
+
+.settings-modal__section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-modal__series-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-modal__series-name {
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-modal__series-name:hover {
+  text-decoration: underline;
+}
+
+.settings-modal__name-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  padding: 2px 6px;
+  border: 1px solid #4e79a7;
+  border-radius: 4px;
+  outline: none;
+}
+
+.settings-modal__color-picker {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1px;
+  cursor: pointer;
+  background: none;
+  flex-shrink: 0;
+}

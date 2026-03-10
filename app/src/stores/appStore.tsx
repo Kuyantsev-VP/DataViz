@@ -24,6 +24,8 @@ type Action =
   | { type: "SET_COLOR"; payload: { id: string; color: string } }
   | { type: "SET_THEME"; payload: Theme }
   | { type: "SET_NOTES"; payload: string }
+  | { type: "SET_TOOLTIP_ALWAYS_ON"; payload: boolean }
+  | { type: "RENAME_SERIES"; payload: { id: string; name: string } }
   | { type: "CLEAR_ALL" };
 
 function computeGlobalXRange(series: Series[]): AxisRange | null {
@@ -57,6 +59,7 @@ const initialView: ViewState = {
   seriesView: {},
   theme: "dark",
   notes: "",
+  tooltipAlwaysOn: false,
 };
 
 const initialState: AppState = {
@@ -162,6 +165,19 @@ function reducer(state: AppState, action: Action): AppState {
     case "SET_NOTES":
       return { ...state, view: { ...view, notes: action.payload } };
 
+    case "SET_TOOLTIP_ALWAYS_ON":
+      return { ...state, view: { ...view, tooltipAlwaysOn: action.payload } };
+
+    case "RENAME_SERIES": {
+      const { id, name } = action.payload;
+      return {
+        ...state,
+        series: state.series.map((s) =>
+          s.id === id ? { ...s, name } : s,
+        ),
+      };
+    }
+
     case "CLEAR_ALL":
       return { series: [], view: { ...initialView } };
 
@@ -182,6 +198,8 @@ interface AppActions {
   setColor: (id: string, color: string) => void;
   setTheme: (theme: Theme) => void;
   setNotes: (text: string) => void;
+  setTooltipAlwaysOn: (on: boolean) => void;
+  renameSeries: (id: string, name: string) => void;
   clearAll: () => void;
 }
 
@@ -209,6 +227,10 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "SET_COLOR", payload: { id, color } }),
       setTheme: (t) => dispatch({ type: "SET_THEME", payload: t }),
       setNotes: (text) => dispatch({ type: "SET_NOTES", payload: text }),
+      setTooltipAlwaysOn: (on) =>
+        dispatch({ type: "SET_TOOLTIP_ALWAYS_ON", payload: on }),
+      renameSeries: (id, name) =>
+        dispatch({ type: "RENAME_SERIES", payload: { id, name } }),
       clearAll: () => dispatch({ type: "CLEAR_ALL" }),
     }),
     [],
