@@ -15,7 +15,7 @@
   width: 13px;
   height: 13px;
   cursor: pointer;
-  accent-color: #4e79a7;
+  accent-color: var(--accent);
   flex-shrink: 0;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .legend__entry:hover {
-  background: rgba(150, 150, 150, 0.15);
+  background: var(--hover-bg);
 }
 
 .legend__entry--hidden {

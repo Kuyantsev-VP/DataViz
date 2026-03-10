@@ -6,7 +6,9 @@
   min-width: 400px;
   max-width: 90vw;
   max-height: 90vh;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  background: var(--modal-bg);
+  color: var(--text);
 }
 
 .notes-modal::backdrop {
@@ -40,6 +42,7 @@
   padding: 2px 6px;
   opacity: 0.5;
   line-height: 1;
+  color: var(--text);
 }
 
 .notes-modal__close:hover {
@@ -51,17 +54,19 @@
   min-width: 300px;
   min-height: 200px;
   resize: both;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   padding: 10px 12px;
   font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
   outline: none;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 .notes-modal__textarea:focus {
-  border-color: #4e79a7;
+  border-color: var(--accent);
 }
 
 .notes-modal__footer {
@@ -76,7 +81,7 @@
   padding: 8px 48px;
   border: none;
   border-radius: 6px;
-  background: #4e79a7;
+  background: var(--accent);
   color: #fff;
   font-size: 14px;
   font-weight: 500;
@@ -84,27 +89,27 @@
 }
 
 .notes-modal__apply:hover {
-  background: #3d6590;
+  background: var(--accent-hover);
 }
 
 .notes-modal__hotkey {
   font-size: 10px;
-  color: #bbb;
+  color: var(--text-faint);
 }
 
 .notes-modal__cancel {
   position: absolute;
   right: 0;
   padding: 6px 14px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   background: none;
   font-size: 12px;
   cursor: pointer;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .notes-modal__cancel:hover {
-  border-color: #999;
-  color: #555;
+  border-color: var(--text-muted);
+  color: var(--text);
 }

@@ -11,7 +11,7 @@
 .x-scrollbar__track {
   position: relative;
   height: 100%;
-  background: rgba(150, 150, 150, 0.15);
+  background: var(--scrollbar-track);
   border-radius: 6px;
 }
 
@@ -20,16 +20,16 @@
   top: 1px;
   bottom: 1px;
   border-radius: 5px;
-  background: rgba(100, 140, 200, 0.5);
+  background: var(--scrollbar-thumb);
   min-width: 12px;
   cursor: grab;
 }
 
 .x-scrollbar__thumb:hover {
-  background: rgba(100, 140, 200, 0.7);
+  background: var(--scrollbar-thumb-hover);
 }
 
 .x-scrollbar__thumb:active {
-  background: rgba(100, 140, 200, 0.85);
+  background: var(--scrollbar-thumb-active);
   cursor: grabbing;
 }

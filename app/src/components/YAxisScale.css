@@ -30,6 +30,7 @@
   padding: 0 2px;
   opacity: 0.6;
   line-height: 1;
+  color: var(--text);
 }
 
 .y-axis-scale__reset:hover {
@@ -53,7 +54,7 @@
   font-size: 10px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .y-axis-scale__value--clickable {
@@ -74,10 +75,12 @@
   width: 64px;
   font-size: 11px;
   padding: 1px 4px;
-  border: 1px solid #4e79a7;
+  border: 1px solid var(--accent);
   border-radius: 3px;
   outline: none;
   font-variant-numeric: tabular-nums;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 .y-axis-scale__offset {
@@ -85,12 +88,12 @@
   flex-direction: column;
   align-items: center;
   padding-top: 4px;
-  border-top: 1px solid rgba(150, 150, 150, 0.2);
+  border-top: 1px solid var(--border-subtle);
   margin-top: 2px;
 }
 
 .y-axis-scale__offset-label {
   font-size: 9px;
-  color: #888;
+  color: var(--text-muted);
   line-height: 1;
 }

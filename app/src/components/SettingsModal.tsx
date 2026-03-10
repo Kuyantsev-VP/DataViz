@@ -102,7 +102,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
             className="settings-modal__theme-btn"
             onClick={() => setTheme(view.theme === "dark" ? "light" : "dark")}
           >
-            {view.theme === "dark" ? "☀ Light" : "🌙 Dark"}
+            {view.theme === "light" ? "☀ Light" : "🌙 Dark"}
           </button>
         </div>
 

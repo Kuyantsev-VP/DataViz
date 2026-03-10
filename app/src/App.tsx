@@ -21,12 +21,12 @@ function NotesIcon() {
 }
 
 function AppContent() {
-  const { series } = useAppState();
+  const { series, view } = useAppState();
   const [showNotes, setShowNotes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <div className="app">
+    <div className={`app theme-${view.theme}`}>
       <header className="app__header">
         <h1>DataViz</h1>
         <FileLoader />

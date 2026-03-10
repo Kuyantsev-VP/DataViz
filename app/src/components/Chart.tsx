@@ -22,6 +22,7 @@ function buildOptions(
   xRange: { min: number; max: number } | null,
   width: number,
   height: number,
+  gridStroke: string,
 ): uPlot.Options {
   const scales: uPlot.Scales = {
     x: {
@@ -82,7 +83,7 @@ function buildOptions(
       splits: () => xSplits,
       values: () => xSplits.map(() => ""),
       ticks: { show: false },
-      grid: { show: true, stroke: "rgba(150,150,150,0.25)", width: 1 },
+      grid: { show: true, stroke: gridStroke, width: 1 },
     },
     {
       scale: "_yGrid",
@@ -91,7 +92,7 @@ function buildOptions(
       splits: () => ySplits,
       values: () => ySplits.map(() => ""),
       ticks: { show: false },
-      grid: { show: true, stroke: "rgba(150,150,150,0.25)", width: 1 },
+      grid: { show: true, stroke: gridStroke, width: 1 },
     },
     ...series.map(() => ({
       show: false as const,
@@ -134,7 +135,10 @@ export function Chart() {
     const w = rect.width || 800;
     const h = rect.height || 400;
 
-    const opts = buildOptions(series, view.seriesView, view.xRange, w, h);
+    const gridStroke = view.theme === "dark"
+      ? "rgba(255,255,255,0.1)"
+      : "rgba(0,0,0,0.1)";
+    const opts = buildOptions(series, view.seriesView, view.xRange, w, h, gridStroke);
     const plot = new uPlot(opts, uData, container);
     uPlotRef.current = plot;
 
@@ -142,7 +146,7 @@ export function Chart() {
       plot.destroy();
       uPlotRef.current = null;
     };
-  }, [series, view.seriesView, view.xRange, uData]);
+  }, [series, view.seriesView, view.xRange, view.theme, uData]);
 
   useEffect(() => {
     const container = containerRef.current;

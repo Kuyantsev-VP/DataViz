@@ -20,7 +20,7 @@
   font-size: 10px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .x-axis-bar__value--clickable {
@@ -38,11 +38,13 @@
   width: 72px;
   font-size: 11px;
   padding: 1px 4px;
-  border: 1px solid #4e79a7;
+  border: 1px solid var(--accent);
   border-radius: 3px;
   outline: none;
   font-variant-numeric: tabular-nums;
   transform: translateX(-50%);
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 .x-axis-bar__reset {
@@ -54,6 +56,7 @@
   opacity: 0.6;
   line-height: 1;
   flex-shrink: 0;
+  color: var(--text);
 }
 
 .x-axis-bar__reset:hover {

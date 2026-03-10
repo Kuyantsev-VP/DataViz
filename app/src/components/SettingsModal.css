@@ -5,7 +5,9 @@
   min-width: 340px;
   max-width: 90vw;
   max-height: 80vh;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  background: var(--modal-bg);
+  color: var(--text);
 }
 
 .settings-modal::backdrop {
@@ -41,6 +43,7 @@
   padding: 2px 6px;
   opacity: 0.5;
   line-height: 1;
+  color: var(--text);
 }
 
 .settings-modal__close:hover {
@@ -56,27 +59,28 @@
 
 .settings-modal__theme-btn {
   padding: 4px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   background: none;
   font-size: 12px;
   cursor: pointer;
   margin-left: auto;
+  color: var(--text);
 }
 
 .settings-modal__theme-btn:hover {
-  border-color: #999;
+  border-color: var(--text-muted);
 }
 
 .settings-modal__divider {
-  border-top: 1px solid rgba(150, 150, 150, 0.25);
+  border-top: 1px solid var(--border-subtle);
   margin: 4px 0;
 }
 
 .settings-modal__section-title {
   font-size: 12px;
   font-weight: 600;
-  color: #888;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -106,15 +110,17 @@
   min-width: 0;
   font-size: 13px;
   padding: 2px 6px;
-  border: 1px solid #4e79a7;
+  border: 1px solid var(--accent);
   border-radius: 4px;
   outline: none;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 .settings-modal__color-picker {
   width: 28px;
   height: 28px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   padding: 1px;
   cursor: pointer;

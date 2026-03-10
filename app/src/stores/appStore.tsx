@@ -57,7 +57,7 @@ function updateSeriesView(
 const initialView: ViewState = {
   xRange: null,
   seriesView: {},
-  theme: "dark",
+  theme: "light",
   notes: "",
   tooltipAlwaysOn: false,
 };
