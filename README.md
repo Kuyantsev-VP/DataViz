@@ -52,26 +52,19 @@ npm -v     # should print 9.x or higher
 ## Installation
 
 ```bash
-cd app
+git clone https://github.com/Kuyantsev-VP/DataViz
+cd DataViz/app
 npm install
 ```
 
 ## Running the dev server
 
 ```bash
-cd app
+git pull
 npm run dev
 ```
 
 The app will be available at `http://localhost:5173`. It is also accessible from the local network (bound to `0.0.0.0`).
-
-## Production build
-
-```bash
-cd app
-npm run build
-npm run preview
-```
 
 ## Usage
 
