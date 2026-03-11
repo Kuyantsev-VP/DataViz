@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAppActions, useExistingNames, useAppState } from "../stores/appStore";
 import { finalizeParse, isParseError, type WizardColumn } from "../utils/csvParser";
 import { SERIES_COLORS } from "../constants";
@@ -23,6 +23,16 @@ export function ImportWizard({ columns, rows, onClose, onError }: ImportWizardPr
   const inputRef = useRef<HTMLInputElement>(null);
 
   const usedColorCount = Object.keys(existingSeries).length;
+
+  const colTypes = useMemo(() => {
+    const first = rows[0];
+    if (!first) return columns.map(() => "unknown");
+    return columns.map((col) => {
+      const v = first[col];
+      if (v === null || v === undefined || v === "") return "empty";
+      return typeof v;
+    });
+  }, [columns, rows]);
 
   const [wizardCols, setWizardCols] = useState<WizardColumn[]>(() => {
     let dataIdx = 0;
@@ -181,6 +191,8 @@ export function ImportWizard({ columns, rows, onClose, onError }: ImportWizardPr
                     )}
                   </span>
                 )}
+
+                <span className="import-wizard__type-badge">{colTypes[idx]}</span>
 
                 {!isTime && (
                   <input

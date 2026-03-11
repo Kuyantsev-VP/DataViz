@@ -106,6 +106,17 @@
   margin-left: 6px;
 }
 
+.import-wizard__type-badge {
+  font-size: 10px;
+  font-family: monospace;
+  color: var(--text-faint);
+  background: var(--hover-bg);
+  border-radius: 3px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
 .import-wizard__name-input {
   flex: 1;
   min-width: 0;

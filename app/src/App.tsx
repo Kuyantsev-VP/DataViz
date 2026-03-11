@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { AppStoreProvider, useAppState, useAppActions } from "./stores/appStore";
 import { loadSession, clearSession, type SavedSession } from "./utils/persistence";
+import { exportSession, importSession } from "./utils/sessionZip";
 import { FileLoader } from "./components/FileLoader";
 import { Chart } from "./components/Chart";
 import { YAxisPanel } from "./components/YAxisPanel";
@@ -10,6 +11,7 @@ import { Legend } from "./components/Legend";
 import { NotesModal } from "./components/NotesModal";
 import { SettingsModal } from "./components/SettingsModal";
 import { SessionRestoreDialog } from "./components/SessionRestoreDialog";
+import { ErrorModal } from "./components/ErrorModal";
 
 function NotesIcon() {
   return (
@@ -33,6 +35,8 @@ function AppContent() {
   const [showNotes, setShowNotes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [startup, setStartup] = useState<StartupState>({ status: "checking" });
+  const [importError, setImportError] = useState<string | null>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadSession().then((saved) => {
@@ -56,6 +60,31 @@ function AppContent() {
     setStartup({ status: "ready" });
   }, []);
 
+  const handleExport = useCallback(() => {
+    exportSession(series, view);
+  }, [series, view]);
+
+  const handleImportFile = useCallback(
+    async (file: File) => {
+      try {
+        const session = await importSession(file);
+        restoreSession(session);
+      } catch (err) {
+        setImportError(err instanceof Error ? err.message : "Import failed");
+      }
+    },
+    [restoreSession],
+  );
+
+  const handleZipChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImportFile(file);
+      if (zipInputRef.current) zipInputRef.current.value = "";
+    },
+    [handleImportFile],
+  );
+
   if (startup.status === "checking") return null;
 
   return (
@@ -72,6 +101,35 @@ function AppContent() {
         <FileLoader />
         <Legend />
         <div className="app__header-spacer" />
+        {series.length > 0 && (
+          <button
+            className="app__icon-btn"
+            onClick={handleExport}
+            title="Export session (.zip)"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 12V3M10 3l-3 3M10 3l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
+        <button
+          className="app__icon-btn"
+          onClick={() => zipInputRef.current?.click()}
+          title="Import session (.zip)"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3v9M10 12l-3-3M10 12l3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <input
+          ref={zipInputRef}
+          type="file"
+          accept=".zip"
+          onChange={handleZipChange}
+          hidden
+        />
         <button
           className="app__icon-btn"
           onClick={() => setShowNotes(true)}
@@ -92,6 +150,9 @@ function AppContent() {
       </header>
       {showNotes && <NotesModal onClose={() => setShowNotes(false)} />}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {importError && (
+        <ErrorModal message={importError} onClose={() => setImportError(null)} />
+      )}
       {series.length > 0 && (
         <main className="app__main">
           <YAxisPanel />
