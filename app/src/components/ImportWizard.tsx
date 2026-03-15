@@ -115,14 +115,18 @@ export function ImportWizard({ columns, rows, onClose, onError }: ImportWizardPr
 
   const handleApply = useCallback(() => {
     setValidationError(null);
-    const result = finalizeParse(rows, wizardCols, existingNames);
-    if (isParseError(result)) {
-      setValidationError(result.message);
-      return;
+    try {
+      const result = finalizeParse(rows, wizardCols, existingNames);
+      if (isParseError(result)) {
+        setValidationError(result.message);
+        return;
+      }
+      addSeries(result.series, result.colors);
+      dialogRef.current?.close();
+      onClose();
+    } catch (err) {
+      setValidationError(err instanceof Error ? err.message : "Unexpected error");
     }
-    addSeries(result.series, result.colors);
-    dialogRef.current?.close();
-    onClose();
   }, [rows, wizardCols, existingNames, addSeries, onClose]);
 
   const enabledCount = wizardCols.filter((c) => c.enabled).length;

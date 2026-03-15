@@ -157,8 +157,8 @@ export function finalizeParse(
     });
 
     const numericValues = values.filter((v): v is number => v !== null);
-    const dataMin = numericValues.length > 0 ? Math.min(...numericValues) : 0;
-    const dataMax = numericValues.length > 0 ? Math.max(...numericValues) : 0;
+    const dataMin = numericValues.length > 0 ? numericValues.reduce((a, b) => a < b ? a : b) : 0;
+    const dataMax = numericValues.length > 0 ? numericValues.reduce((a, b) => a > b ? a : b) : 0;
 
     return {
       id: `${resolvedNames[i]}_${Date.now()}_${i}`,

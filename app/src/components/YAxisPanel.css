@@ -1,6 +1,6 @@
 .y-axis-panel {
   display: flex;
-  gap: 4px;
+  gap: 1px;
   height: 100%;
   overflow-x: auto;
   flex-shrink: 0;

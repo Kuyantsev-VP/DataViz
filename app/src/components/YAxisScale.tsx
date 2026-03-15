@@ -20,8 +20,8 @@ function formatTick(value: number): string {
   if (Math.abs(value) >= 1e6 || (Math.abs(value) < 1e-3 && value !== 0)) {
     return value.toExponential(2);
   }
-  const decimals = Math.abs(value) < 1 ? 4 : Math.abs(value) < 100 ? 2 : 1;
-  return value.toFixed(decimals);
+  const decimals = 2;
+  return parseFloat(value.toFixed(decimals)).toString();
 }
 
 function generateTicks(min: number, max: number): number[] {
@@ -134,40 +134,39 @@ export function YAxisScale({
 
   return (
     <div className="y-axis-scale" style={{ borderColor: color }}>
-      <div className="y-axis-scale__header">
-        <span className="y-axis-scale__name" style={{ color }}>
-          {name}
-        </span>
-        {isCustomRange && (
-          <button
-            className="y-axis-scale__reset"
-            onClick={onReset}
-            title="Reset to data range"
-          >
-            ↺
-          </button>
-        )}
-      </div>
-
-      <div className="y-axis-scale__ticks">
-        <div className="y-axis-scale__tick y-axis-scale__tick--bound">
-          {renderEditable("max", effectiveMax, "Click to edit max")}
-        </div>
-
-        {ticks.reverse().map((tick, i) => (
-          <div key={i} className="y-axis-scale__tick">
-            <span className="y-axis-scale__value">{formatTick(tick)}</span>
+      <span className="y-axis-scale__name" style={{ color }}>
+        {name}
+      </span>
+      <div className="y-axis-scale__body">
+        <div className="y-axis-scale__ticks">
+          <div className="y-axis-scale__tick y-axis-scale__tick--bound">
+            {renderEditable("max", effectiveMax, "Click to edit max")}
+            {isCustomRange && (
+              <button
+                className="y-axis-scale__reset"
+                onClick={onReset}
+                title="Reset to data range"
+              >
+                ↺
+              </button>
+            )}
           </div>
-        ))}
 
-        <div className="y-axis-scale__tick y-axis-scale__tick--bound">
-          {renderEditable("min", effectiveMin, "Click to edit min")}
+          {ticks.reverse().map((tick, i) => (
+            <div key={i} className="y-axis-scale__tick">
+              <span className="y-axis-scale__value">{formatTick(tick)}</span>
+            </div>
+          ))}
+
+          <div className="y-axis-scale__tick y-axis-scale__tick--bound">
+            {renderEditable("min", effectiveMin, "Click to edit min")}
+          </div>
         </div>
-      </div>
 
-      <div className="y-axis-scale__offset">
-        <span className="y-axis-scale__offset-label">ofs</span>
-        {renderEditable("offset", offset, "Click to edit offset")}
+        <div className="y-axis-scale__offset">
+          <span className="y-axis-scale__offset-label">Y-offs</span>
+          {renderEditable("offset", offset, "Click to edit offset")}
+        </div>
       </div>
     </div>
   );

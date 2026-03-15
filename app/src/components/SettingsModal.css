@@ -127,3 +127,46 @@
   background: none;
   flex-shrink: 0;
 }
+
+.settings-modal__xoffs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.settings-modal__xoffs-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.settings-modal__xoffs-input {
+  width: 64px;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-modal__xoffs-input:focus {
+  border-color: var(--accent);
+}
+
+.settings-modal__xoffs-value {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  color: var(--text);
+  min-width: 24px;
+  text-align: center;
+}
+
+.settings-modal__xoffs-value:hover {
+  text-decoration: underline;
+  color: var(--accent);
+}

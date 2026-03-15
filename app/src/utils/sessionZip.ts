@@ -12,6 +12,7 @@ interface SessionJson {
     {
       yRange: SeriesViewState["yRange"];
       yOffset: number;
+      xOffset: number;
       visible: boolean;
       scaleVisible: boolean;
       color: string;
@@ -72,6 +73,7 @@ export async function exportSession(
     seriesSettings[s.name] = {
       yRange: sv.yRange,
       yOffset: sv.yOffset,
+      xOffset: sv.xOffset,
       visible: sv.visible,
       scaleVisible: sv.scaleVisible,
       color: sv.color,
@@ -166,8 +168,8 @@ export async function importSession(file: File): Promise<SavedSession> {
     }
 
     const numericValues = seriesValues.filter((v): v is number => v !== null);
-    const dataMin = numericValues.length > 0 ? Math.min(...numericValues) : 0;
-    const dataMax = numericValues.length > 0 ? Math.max(...numericValues) : 0;
+    const dataMin = numericValues.length > 0 ? numericValues.reduce((a, b) => a < b ? a : b) : 0;
+    const dataMax = numericValues.length > 0 ? numericValues.reduce((a, b) => a > b ? a : b) : 0;
 
     return {
       id: `${col}_${Date.now()}_${i}`,
@@ -186,6 +188,7 @@ export async function importSession(file: File): Promise<SavedSession> {
       ? {
           yRange: saved.yRange,
           yOffset: saved.yOffset ?? 0,
+          xOffset: saved.xOffset ?? 0,
           visible: saved.visible ?? true,
           scaleVisible: saved.scaleVisible ?? true,
           color: saved.color ?? "#4e79a7",
@@ -193,6 +196,7 @@ export async function importSession(file: File): Promise<SavedSession> {
       : {
           yRange: { min: s.dataMin, max: s.dataMax },
           yOffset: 0,
+          xOffset: 0,
           visible: true,
           scaleVisible: true,
           color: "#4e79a7",

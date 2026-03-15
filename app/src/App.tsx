@@ -31,7 +31,7 @@ type StartupState =
 
 function AppContent() {
   const { series, view } = useAppState();
-  const { restoreSession } = useAppActions();
+  const { restoreSession, setYOffsetLocked } = useAppActions();
   const [showNotes, setShowNotes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [startup, setStartup] = useState<StartupState>({ status: "checking" });
@@ -100,6 +100,16 @@ function AppContent() {
         <h1>DataViz</h1>
         <FileLoader />
         <Legend />
+        {series.length > 0 && (
+          <label className="app__lock-yoffs" title="Lock Y offsets together">
+            <input
+              type="checkbox"
+              checked={view.yOffsetLocked}
+              onChange={(e) => setYOffsetLocked(e.target.checked)}
+            />
+            <span>Lock Y offset</span>
+          </label>
+        )}
         <div className="app__header-spacer" />
         {series.length > 0 && (
           <button

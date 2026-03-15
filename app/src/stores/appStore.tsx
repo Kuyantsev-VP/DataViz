@@ -24,22 +24,28 @@ type Action =
   | { type: "SET_VISIBILITY"; payload: { id: string; visible: boolean } }
   | { type: "SET_SCALE_VISIBILITY"; payload: { id: string; scaleVisible: boolean } }
   | { type: "SET_Y_OFFSET"; payload: { id: string; offset: number } }
+  | { type: "SET_X_OFFSET"; payload: { id: string; offset: number } }
   | { type: "SET_COLOR"; payload: { id: string; color: string } }
   | { type: "SET_THEME"; payload: Theme }
   | { type: "SET_NOTES"; payload: string }
   | { type: "SET_TOOLTIP_ALWAYS_ON"; payload: boolean }
+  | { type: "SET_Y_OFFSET_LOCKED"; payload: boolean }
   | { type: "RENAME_SERIES"; payload: { id: string; name: string } }
   | { type: "RESTORE_SESSION"; payload: SavedSession }
   | { type: "CLEAR_ALL" };
 
-function computeGlobalXRange(series: Series[]): AxisRange | null {
+function computeGlobalXRange(
+  series: Series[],
+  seriesView: Record<string, SeriesViewState>,
+): AxisRange | null {
   if (series.length === 0) return null;
   let min = Infinity;
   let max = -Infinity;
   for (const s of series) {
     if (s.time.length === 0) continue;
-    min = Math.min(min, s.time[0]);
-    max = Math.max(max, s.time[s.time.length - 1]);
+    const ofs = seriesView[s.id]?.xOffset ?? 0;
+    min = Math.min(min, s.time[0] + ofs);
+    max = Math.max(max, s.time[s.time.length - 1] + ofs);
   }
   return min <= max ? { min, max } : null;
 }
@@ -63,7 +69,8 @@ const initialView: ViewState = {
   seriesView: {},
   theme: "light",
   notes: "",
-  tooltipAlwaysOn: false,
+  tooltipAlwaysOn: true,
+  yOffsetLocked: false,
 };
 
 const initialState: AppState = {
@@ -85,6 +92,7 @@ function reducer(state: AppState, action: Action): AppState {
         seriesView[s.id] = {
           yRange: { min: s.dataMin, max: s.dataMax },
           yOffset: 0,
+          xOffset: 0,
           visible: true,
           scaleVisible: true,
           color: colors?.[i] ?? SERIES_COLORS[(colorBase + i) % SERIES_COLORS.length],
@@ -96,7 +104,7 @@ function reducer(state: AppState, action: Action): AppState {
         series: allSeries,
         view: {
           ...view,
-          xRange: computeGlobalXRange(allSeries),
+          xRange: computeGlobalXRange(allSeries, seriesView),
           seriesView,
         },
       };
@@ -108,7 +116,7 @@ function reducer(state: AppState, action: Action): AppState {
     case "RESET_X_RANGE":
       return {
         ...state,
-        view: { ...view, xRange: computeGlobalXRange(state.series) },
+        view: { ...view, xRange: computeGlobalXRange(state.series, view.seriesView) },
       };
 
     case "SET_Y_RANGE":
@@ -131,13 +139,42 @@ function reducer(state: AppState, action: Action): AppState {
       };
     }
 
-    case "SET_Y_OFFSET":
+    case "SET_Y_OFFSET": {
+      if (!view.yOffsetLocked) {
+        return {
+          ...state,
+          view: updateSeriesView(view, action.payload.id, {
+            yOffset: action.payload.offset,
+          }),
+        };
+      }
+      const oldOffset = view.seriesView[action.payload.id]?.yOffset ?? 0;
+      const delta = action.payload.offset - oldOffset;
+      const updatedSeriesView = { ...view.seriesView };
+      for (const key of Object.keys(updatedSeriesView)) {
+        updatedSeriesView[key] = {
+          ...updatedSeriesView[key],
+          yOffset: updatedSeriesView[key].yOffset + delta,
+        };
+      }
       return {
         ...state,
-        view: updateSeriesView(view, action.payload.id, {
-          yOffset: action.payload.offset,
-        }),
+        view: { ...view, seriesView: updatedSeriesView },
       };
+    }
+
+    case "SET_X_OFFSET": {
+      const newView = updateSeriesView(view, action.payload.id, {
+        xOffset: action.payload.offset,
+      });
+      return {
+        ...state,
+        view: {
+          ...newView,
+          xRange: computeGlobalXRange(state.series, newView.seriesView),
+        },
+      };
+    }
 
     case "SET_VISIBILITY":
       return {
@@ -172,6 +209,9 @@ function reducer(state: AppState, action: Action): AppState {
     case "SET_TOOLTIP_ALWAYS_ON":
       return { ...state, view: { ...view, tooltipAlwaysOn: action.payload } };
 
+    case "SET_Y_OFFSET_LOCKED":
+      return { ...state, view: { ...view, yOffsetLocked: action.payload } };
+
     case "RENAME_SERIES": {
       const { id, name } = action.payload;
       return {
@@ -203,12 +243,14 @@ interface AppActions {
   setYRange: (id: string, range: AxisRange) => void;
   resetYRange: (id: string) => void;
   setYOffset: (id: string, offset: number) => void;
+  setXOffset: (id: string, offset: number) => void;
   setVisibility: (id: string, visible: boolean) => void;
   setScaleVisibility: (id: string, scaleVisible: boolean) => void;
   setColor: (id: string, color: string) => void;
   setTheme: (theme: Theme) => void;
   setNotes: (text: string) => void;
   setTooltipAlwaysOn: (on: boolean) => void;
+  setYOffsetLocked: (locked: boolean) => void;
   renameSeries: (id: string, name: string) => void;
   restoreSession: (session: SavedSession) => void;
   clearAll: () => void;
@@ -231,6 +273,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       resetYRange: (id) => dispatch({ type: "RESET_Y_RANGE", payload: id }),
       setYOffset: (id, offset) =>
         dispatch({ type: "SET_Y_OFFSET", payload: { id, offset } }),
+      setXOffset: (id, offset) =>
+        dispatch({ type: "SET_X_OFFSET", payload: { id, offset } }),
       setVisibility: (id, visible) =>
         dispatch({ type: "SET_VISIBILITY", payload: { id, visible } }),
       setScaleVisibility: (id, scaleVisible) =>
@@ -241,6 +285,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       setNotes: (text) => dispatch({ type: "SET_NOTES", payload: text }),
       setTooltipAlwaysOn: (on) =>
         dispatch({ type: "SET_TOOLTIP_ALWAYS_ON", payload: on }),
+      setYOffsetLocked: (locked) =>
+        dispatch({ type: "SET_Y_OFFSET_LOCKED", payload: locked }),
       renameSeries: (id, name) =>
         dispatch({ type: "RENAME_SERIES", payload: { id, name } }),
       restoreSession: (session) =>
@@ -286,8 +332,11 @@ export function useExistingNames() {
   return useMemo(() => new Set(series.map((s) => s.name)), [series]);
 }
 
-/** Derived: default X range from all data. */
+/** Derived: default X range from all data (with xOffset applied). */
 export function useDataXRange() {
-  const { series } = useAppState();
-  return useMemo(() => computeGlobalXRange(series), [series]);
+  const { series, view } = useAppState();
+  return useMemo(
+    () => computeGlobalXRange(series, view.seriesView),
+    [series, view.seriesView],
+  );
 }

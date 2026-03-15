@@ -16,6 +16,14 @@
   transform: translateX(-50%);
 }
 
+.x-axis-bar__tick--first {
+  transform: translateX(0);
+}
+
+.x-axis-bar__tick--last {
+  transform: translateX(-100%);
+}
+
 .x-axis-bar__value {
   font-size: 10px;
   font-variant-numeric: tabular-nums;
@@ -42,9 +50,12 @@
   border-radius: 3px;
   outline: none;
   font-variant-numeric: tabular-nums;
-  transform: translateX(-50%);
   background: var(--input-bg);
   color: var(--text);
+}
+
+.x-axis-bar__tick--last .x-axis-bar__input {
+  transform: translateX(-100%);
 }
 
 .x-axis-bar__reset {

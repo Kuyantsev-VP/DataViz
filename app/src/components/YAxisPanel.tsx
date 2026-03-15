@@ -21,7 +21,7 @@ export function YAxisPanel() {
             offset={sv.yOffset}
             dataMin={s.dataMin}
             dataMax={s.dataMax}
-            visible={sv.visible && sv.scaleVisible}
+            visible={sv.scaleVisible}
             onRangeChange={(min, max) => setYRange(s.id, { min, max })}
             onOffsetChange={(offset) => setYOffset(s.id, offset)}
             onReset={() => resetYRange(s.id)}

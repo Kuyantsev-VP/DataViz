@@ -8,7 +8,7 @@ function formatTick(value: number): string {
     return value.toExponential(2);
   }
   const decimals = Math.abs(value) < 1 ? 4 : Math.abs(value) < 100 ? 2 : 1;
-  return value.toFixed(decimals);
+  return parseFloat(value.toFixed(decimals)).toString();
 }
 
 function generateAllTicks(min: number, max: number): number[] {
@@ -86,10 +86,14 @@ export function XAxisBar() {
           const editable = isEditable(i);
           const editing = editingIdx === i;
 
+          const isFirst = i === 0;
+          const isLast = i === ticks.length - 1;
+          const tickClass = `x-axis-bar__tick${isFirst ? " x-axis-bar__tick--first" : isLast ? " x-axis-bar__tick--last" : ""}`;
+
           return (
             <div
               key={i}
-              className="x-axis-bar__tick"
+              className={tickClass}
               style={{ left: `${pct}%` }}
             >
               {editing ? (

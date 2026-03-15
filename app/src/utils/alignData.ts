@@ -1,25 +1,36 @@
-import type { AlignedData, Series } from "../types";
+import type { AlignedData, Series, SeriesViewState } from "../types";
 
 /**
  * Merge multiple series (potentially with different time arrays)
  * into a single aligned dataset for uPlot.
+ * Applies per-series xOffset before merging.
  *
  * Uses sorted merge-join — O(N) per series where N = merged time length.
  */
-export function alignData(seriesList: Series[]): AlignedData {
+export function alignData(
+  seriesList: Series[],
+  seriesView?: Record<string, SeriesViewState>,
+): AlignedData {
   if (seriesList.length === 0) {
     return { time: [], values: [], seriesIds: [] };
   }
 
-  const mergedTime = mergeTimelines(seriesList.map((s) => s.time));
+  const shiftedTimes = seriesList.map((s) => {
+    const ofs = seriesView?.[s.id]?.xOffset ?? 0;
+    if (ofs === 0) return s.time;
+    return s.time.map((t) => t + ofs);
+  });
 
-  const values = seriesList.map((s) => {
-    if (s.time === mergedTime || s.time.length === mergedTime.length) {
-      const allMatch = s.time.length === mergedTime.length &&
-        s.time.every((t, i) => t === mergedTime[i]);
+  const mergedTime = mergeTimelines(shiftedTimes);
+
+  const values = seriesList.map((s, idx) => {
+    const sTime = shiftedTimes[idx];
+    if (sTime === mergedTime || sTime.length === mergedTime.length) {
+      const allMatch = sTime.length === mergedTime.length &&
+        sTime.every((t, i) => t === mergedTime[i]);
       if (allMatch) return s.values;
     }
-    return alignValues(mergedTime, s.time, s.values);
+    return alignValues(mergedTime, sTime, s.values);
   });
 
   return {

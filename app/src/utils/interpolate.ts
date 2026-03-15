@@ -14,7 +14,7 @@ export interface TooltipEntry {
 export function getTooltipValues(
   time: number,
   seriesList: Series[],
-  seriesView: Record<string, { visible: boolean; color: string }>,
+  seriesView: Record<string, { visible: boolean; color: string; xOffset?: number }>,
 ): TooltipEntry[] {
   const entries: TooltipEntry[] = [];
 
@@ -22,7 +22,8 @@ export function getTooltipValues(
     const sv = seriesView[s.id];
     if (!sv?.visible) continue;
 
-    const value = interpolateAt(time, s.time, s.values);
+    const localTime = time - (sv.xOffset ?? 0);
+    const value = interpolateAt(localTime, s.time, s.values);
     if (value === null) continue;
 
     entries.push({

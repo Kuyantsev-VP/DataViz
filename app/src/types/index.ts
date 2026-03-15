@@ -21,6 +21,7 @@ export interface AxisRange {
 export interface SeriesViewState {
   yRange: AxisRange;
   yOffset: number;
+  xOffset: number;
   visible: boolean;
   scaleVisible: boolean;
   color: string;
@@ -33,6 +34,7 @@ export interface ViewState {
   theme: Theme;
   notes: string;
   tooltipAlwaysOn: boolean;
+  yOffsetLocked: boolean;
 }
 
 export type Theme = "light" | "dark";

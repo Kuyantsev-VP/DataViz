@@ -31,7 +31,7 @@ function buildOptions(
     },
     _yGrid: {
       auto: false,
-      range: [0, 1],
+      range: [-0.001, 1],
     },
   };
 
@@ -39,9 +39,14 @@ function buildOptions(
     const sv = seriesView[s.id];
     if (!sv) continue;
     const ofs = sv.yOffset ?? 0;
+    let rMin = sv.yRange.min + ofs;
+    let rMax = sv.yRange.max + ofs;
+    const span = rMax - rMin;
+    const pad = span > 0 ? span * 0.0025 : (rMin === 0 ? 1 : Math.abs(rMin) * 0.1);
+    rMin -= pad;
     scales[s.id] = {
       auto: false,
-      range: [sv.yRange.min + ofs, sv.yRange.max + ofs],
+      range: [rMin, rMax],
     };
   }
 
@@ -116,7 +121,10 @@ export function Chart() {
   const uPlotRef = useRef<uPlot | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  const aligned = useMemo(() => alignData(series), [series]);
+  const aligned = useMemo(
+    () => alignData(series, view.seriesView),
+    [series, view.seriesView],
+  );
 
   const uData = useMemo((): uPlot.AlignedData => {
     return [aligned.time, ...aligned.values] as uPlot.AlignedData;

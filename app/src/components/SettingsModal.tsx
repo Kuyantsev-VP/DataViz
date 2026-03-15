@@ -8,12 +8,16 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const { series, view } = useAppState();
-  const { setTooltipAlwaysOn, setTheme, renameSeries, setColor } = useAppActions();
+  const { setTooltipAlwaysOn, setTheme, renameSeries, setColor, setXOffset } = useAppActions();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [editingXOffsId, setEditingXOffsId] = useState<string | null>(null);
+  const [xOffsInput, setXOffsInput] = useState("");
+  const xOffsRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -28,6 +32,12 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     }
   }, [editingId]);
 
+  useEffect(() => {
+    if (editingXOffsId && xOffsRef.current) {
+      xOffsRef.current.select();
+    }
+  }, [editingXOffsId]);
+
   const close = useCallback(() => {
     dialogRef.current?.close();
     onClose();
@@ -35,12 +45,12 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Escape" && !editingId) {
+      if (e.key === "Escape" && !editingId && !editingXOffsId) {
         e.preventDefault();
         close();
       }
     },
-    [close, editingId],
+    [close, editingId, editingXOffsId],
   );
 
   const handleBackdropClick = useCallback(
@@ -69,6 +79,28 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       if (e.key === "Escape") setEditingId(null);
     },
     [commitRename],
+  );
+
+  const startXOffsEdit = useCallback((id: string, current: number) => {
+    setXOffsInput(String(current));
+    setEditingXOffsId(id);
+  }, []);
+
+  const commitXOffs = useCallback(() => {
+    if (editingXOffsId) {
+      const val = parseFloat(xOffsInput);
+      setXOffset(editingXOffsId, isNaN(val) ? 0 : val);
+    }
+    setEditingXOffsId(null);
+  }, [editingXOffsId, xOffsInput, setXOffset]);
+
+  const handleXOffsKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === "Enter") commitXOffs();
+      if (e.key === "Escape") setEditingXOffsId(null);
+    },
+    [commitXOffs],
   );
 
   return (
@@ -142,6 +174,29 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                     onChange={(e) => setColor(s.id, e.target.value)}
                     title="Pick color"
                   />
+                  <div className="settings-modal__xoffs">
+                    <span className="settings-modal__xoffs-label">X-offs</span>
+                    {editingXOffsId === s.id ? (
+                      <input
+                        ref={xOffsRef}
+                        className="settings-modal__xoffs-input"
+                        type="text"
+                        value={xOffsInput}
+                        onChange={(e) => setXOffsInput(e.target.value)}
+                        onBlur={commitXOffs}
+                        onKeyDown={handleXOffsKeyDown}
+                        autoFocus
+                      />
+                    ) : (
+                      <span
+                        className="settings-modal__xoffs-value"
+                        onClick={() => startXOffsEdit(s.id, sv.xOffset)}
+                        title="Click to edit"
+                      >
+                        {sv.xOffset}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
