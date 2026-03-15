@@ -31,7 +31,7 @@ type StartupState =
 
 function AppContent() {
   const { series, view } = useAppState();
-  const { restoreSession, setYOffsetLocked } = useAppActions();
+  const { restoreSession, setYOffsetLocked, setSnapToClosest } = useAppActions();
   const [showNotes, setShowNotes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [startup, setStartup] = useState<StartupState>({ status: "checking" });
@@ -100,6 +100,7 @@ function AppContent() {
         <h1>DataViz</h1>
         <FileLoader />
         <Legend />
+        <div className="app__header-spacer" />
         {series.length > 0 && (
           <label className="app__lock-yoffs" title="Lock Y offsets together">
             <input
@@ -110,7 +111,16 @@ function AppContent() {
             <span>Lock Y offset</span>
           </label>
         )}
-        <div className="app__header-spacer" />
+        {series.length > 0 && (
+          <label className="app__lock-yoffs" title="Snap tooltip to closest data point">
+            <input
+              type="checkbox"
+              checked={view.snapToClosest}
+              onChange={(e) => setSnapToClosest(e.target.checked)}
+            />
+            <span>Snap to closest</span>
+          </label>
+        )}
         {series.length > 0 && (
           <button
             className="app__icon-btn"

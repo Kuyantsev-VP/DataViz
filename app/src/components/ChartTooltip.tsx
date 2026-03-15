@@ -47,7 +47,17 @@ export function ChartTooltip({ time, entries, x, y }: ChartTooltipProps) {
                 />
               </td>
               <td className="chart-tooltip__name">{e.name}</td>
-              <td className="chart-tooltip__val">{formatValue(e.value)}</td>
+              <td>
+                <span
+                  className="chart-tooltip__val"
+                  style={{ visibility: e.interpolated ? "visible" : "hidden" }}
+                >
+                  {" (i)"}
+                </span>
+              </td>
+              <td className="chart-tooltip__val">
+                {formatValue(e.value)}
+              </td>
             </tr>
           ))}
         </tbody>

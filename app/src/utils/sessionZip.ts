@@ -20,6 +20,7 @@ interface SessionJson {
   >;
   theme: ViewState["theme"];
   tooltipAlwaysOn: boolean;
+  snapToClosest: boolean;
 }
 
 /**
@@ -87,6 +88,7 @@ export async function exportSession(
     seriesSettings,
     theme: view.theme,
     tooltipAlwaysOn: view.tooltipAlwaysOn,
+    snapToClosest: view.snapToClosest,
   };
 
   zip.file("session.json", JSON.stringify(sessionJson, null, 2));
@@ -213,6 +215,8 @@ export async function importSession(file: File): Promise<SavedSession> {
     theme: sessionJson.theme ?? "light",
     notes,
     tooltipAlwaysOn: sessionJson.tooltipAlwaysOn ?? false,
+    yOffsetLocked: false,
+    snapToClosest: sessionJson.snapToClosest ?? false,
   };
 
   return { series, view };

@@ -138,18 +138,19 @@ export function YAxisScale({
         {name}
       </span>
       <div className="y-axis-scale__body">
+      {isCustomRange && (
+          <button
+            className="y-axis-scale__reset"
+            onClick={onReset}
+            title="Reset to data range"
+          >
+            ↺
+          </button>
+        )}
         <div className="y-axis-scale__ticks">
           <div className="y-axis-scale__tick y-axis-scale__tick--bound">
             {renderEditable("max", effectiveMax, "Click to edit max")}
-            {isCustomRange && (
-              <button
-                className="y-axis-scale__reset"
-                onClick={onReset}
-                title="Reset to data range"
-              >
-                ↺
-              </button>
-            )}
+
           </div>
 
           {ticks.reverse().map((tick, i) => (

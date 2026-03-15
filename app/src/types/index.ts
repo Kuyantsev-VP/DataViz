@@ -35,6 +35,7 @@ export interface ViewState {
   notes: string;
   tooltipAlwaysOn: boolean;
   yOffsetLocked: boolean;
+  snapToClosest: boolean;
 }
 
 export type Theme = "light" | "dark";

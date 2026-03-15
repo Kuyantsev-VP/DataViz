@@ -30,6 +30,7 @@ type Action =
   | { type: "SET_NOTES"; payload: string }
   | { type: "SET_TOOLTIP_ALWAYS_ON"; payload: boolean }
   | { type: "SET_Y_OFFSET_LOCKED"; payload: boolean }
+  | { type: "SET_SNAP_TO_CLOSEST"; payload: boolean }
   | { type: "RENAME_SERIES"; payload: { id: string; name: string } }
   | { type: "RESTORE_SESSION"; payload: SavedSession }
   | { type: "CLEAR_ALL" };
@@ -71,6 +72,7 @@ const initialView: ViewState = {
   notes: "",
   tooltipAlwaysOn: true,
   yOffsetLocked: false,
+  snapToClosest: false,
 };
 
 const initialState: AppState = {
@@ -212,6 +214,9 @@ function reducer(state: AppState, action: Action): AppState {
     case "SET_Y_OFFSET_LOCKED":
       return { ...state, view: { ...view, yOffsetLocked: action.payload } };
 
+    case "SET_SNAP_TO_CLOSEST":
+      return { ...state, view: { ...view, snapToClosest: action.payload } };
+
     case "RENAME_SERIES": {
       const { id, name } = action.payload;
       return {
@@ -251,6 +256,7 @@ interface AppActions {
   setNotes: (text: string) => void;
   setTooltipAlwaysOn: (on: boolean) => void;
   setYOffsetLocked: (locked: boolean) => void;
+  setSnapToClosest: (snap: boolean) => void;
   renameSeries: (id: string, name: string) => void;
   restoreSession: (session: SavedSession) => void;
   clearAll: () => void;
@@ -287,6 +293,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "SET_TOOLTIP_ALWAYS_ON", payload: on }),
       setYOffsetLocked: (locked) =>
         dispatch({ type: "SET_Y_OFFSET_LOCKED", payload: locked }),
+      setSnapToClosest: (snap) =>
+        dispatch({ type: "SET_SNAP_TO_CLOSEST", payload: snap }),
       renameSeries: (id, name) =>
         dispatch({ type: "RENAME_SERIES", payload: { id, name } }),
       restoreSession: (session) =>

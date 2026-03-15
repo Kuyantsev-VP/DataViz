@@ -3,7 +3,12 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { useAppState } from "../stores/appStore";
 import { alignData } from "../utils/alignData";
-import { getTooltipValues, type TooltipEntry } from "../utils/interpolate";
+import {
+  getTooltipValues,
+  getSnapTooltipValues,
+  findClosestTime,
+  type TooltipEntry,
+} from "../utils/interpolate";
 import { ChartTooltip } from "./ChartTooltip";
 import { INTERMEDIATE_POINTS_CNT } from "../constants";
 import type { Series, SeriesViewState } from "../types";
@@ -185,18 +190,36 @@ export function Chart() {
       const cx = clientX - rect.left;
       if (cx < 0 || cx > rect.width) return;
 
-      const time = plot.posToVal(cx, "x");
-      const entries = getTooltipValues(time, series, view.seriesView);
+      const cursorTime = plot.posToVal(cx, "x");
+
+      let time: number;
+      let entries: TooltipEntry[];
+      let crosshairX: number;
+      let tooltipX: number;
+
+      if (view.snapToClosest) {
+        const snapped = findClosestTime(cursorTime, series, view.seriesView);
+        if (snapped === null) return;
+        time = snapped;
+        entries = getSnapTooltipValues(snapped, series, view.seriesView);
+        crosshairX = plot.valToPos(snapped, "x");
+        tooltipX = rect.left + crosshairX + 12;
+      } else {
+        time = cursorTime;
+        entries = getTooltipValues(cursorTime, series, view.seriesView);
+        crosshairX = cx;
+        tooltipX = clientX + 12;
+      }
 
       setTooltip({
         time,
         entries,
-        x: clientX + 12,
+        x: tooltipX,
         y: clientY - 12,
-        crosshairX: cx,
+        crosshairX,
       });
     },
-    [series, view.seriesView],
+    [series, view.seriesView, view.snapToClosest],
   );
 
   const handleContextMenu = useCallback(
