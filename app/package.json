@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:dev": "npm run build && electron .",
-    "electron:build": "npm run build && electron-builder --win"
+    "electron:build": "tsc -p tsconfig.electron_build.json && vite build && electron-builder --win"
   },
   "build": {
     "appId": "com.dataviz.app",
