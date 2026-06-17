@@ -45,9 +45,19 @@ jobs:
           name: DataViz-windows
           path: dist-electron/*.exe
 
+      - name: Get tag message
+        if: startsWith(github.ref, 'refs/tags/')
+        id: tag_msg
+        shell: bash
+        run: |
+          MSG=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: dist-electron/*.exe
-          generate_release_notes: true
+          body: ${{ steps.tag_msg.outputs.body }}
