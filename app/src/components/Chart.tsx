@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo, useState, useCallback } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
-import { useAppState } from "../stores/appStore";
+import { useAppState, useAppActions } from "../stores/appStore";
 import { alignData } from "../utils/alignData";
 import {
   getTooltipValues,
@@ -12,6 +12,13 @@ import {
 import { ChartTooltip } from "./ChartTooltip";
 import { INTERMEDIATE_POINTS_CNT } from "../constants";
 import type { Series, SeriesViewState } from "../types";
+
+interface DragState {
+  startPx: number;
+  startMin: number;
+  startMax: number;
+  plotWidth: number;
+}
 
 interface TooltipState {
   time: number;
@@ -122,9 +129,12 @@ function buildOptions(
 
 export function Chart() {
   const { series, view } = useAppState();
+  const { setXRange } = useAppActions();
   const containerRef = useRef<HTMLDivElement>(null);
   const uPlotRef = useRef<uPlot | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const aligned = useMemo(
     () => alignData(series, view.seriesView),
@@ -222,6 +232,56 @@ export function Chart() {
     [series, view.seriesView, view.snapToClosest],
   );
 
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      const drag = dragRef.current;
+      if (!drag || !(e.buttons & 1)) return;
+
+      const deltaPx = e.clientX - drag.startPx;
+      const span = drag.startMax - drag.startMin;
+      const timeDelta = deltaPx * span / drag.plotWidth;
+
+      setXRange({
+        min: drag.startMin - timeDelta,
+        max: drag.startMax - timeDelta,
+      });
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      dragRef.current = null;
+      setIsDragging(false);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [setXRange]);
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      const plot = uPlotRef.current;
+      if (!plot || !view.xRange) return;
+
+      const overEl = plot.root.querySelector(".u-over") as HTMLElement | null;
+      if (!overEl) return;
+
+      dragRef.current = {
+        startPx: e.clientX,
+        startMin: view.xRange.min,
+        startMax: view.xRange.max,
+        plotWidth: overEl.getBoundingClientRect().width,
+      };
+      setIsDragging(true);
+      e.preventDefault();
+    },
+    [view.xRange],
+  );
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -232,6 +292,7 @@ export function Chart() {
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
+      if (dragRef.current) return;
       if (view.tooltipAlwaysOn) {
         updateTooltip(e.clientX, e.clientY);
       } else if (e.buttons & 2) {
@@ -265,6 +326,8 @@ export function Chart() {
     <div
       ref={containerRef}
       className="chart-container"
+      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
