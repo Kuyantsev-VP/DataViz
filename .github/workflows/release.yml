@@ -47,12 +47,17 @@ jobs:
           name: DataViz-windows
           path: dist-electron/*.exe
 
+      - name: Fetch tags
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: git fetch --tags --force
+
       - name: Get tag message
         if: startsWith(github.ref, 'refs/tags/')
         id: tag_msg
         shell: bash
         run: |
-          MSG=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          MSG=$(git for-each-ref "refs/tags/$GITHUB_REF_NAME" --format='%(contents)')
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$MSG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
