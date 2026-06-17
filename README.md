@@ -57,6 +57,10 @@ cd DataViz/app
 npm install
 ```
 
+## Creating release
+
+`git tag v1.0.x && git push --tags`
+
 ## Running the dev server
 
 ```bash
